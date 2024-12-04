@@ -3,30 +3,37 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    // public function login(Request $req)
-    // {
-    //     $submit = $req['submit'];
-    //     if ($submit == 'submit'){
-    //         die('button pressed');
-    //     }
-    // return view('login');
-    // }
     public function loginForm()
     {
-        return view('login');  // Return the login view
+        return view('login');
     }
 
-    // Method to handle form submission (POST request)
     public function login(Request $req)
     {
         $submit = $req['submit'];
         if ($submit == 'submit') {
-            die('Button pressed');
+            $req->validate([
+                'email' => 'required|email',  
+                'password' => 'required|min:6',  
+            ]);    
+            if (\Auth::attempt($req->only('email', 'password'))) {
+                return redirect('/home');
+            } else {
+                return redirect('/login')->with('error', 'Incorrect Username or Password');
+            }
         }
         return view('login');
+    } 
+    public function dashboard(){
+        return view('main');
     }
-
+    public function logout(){
+        Session.flush();
+        \Auth::logout();
+        return redirect('/login');
+    }
 }
